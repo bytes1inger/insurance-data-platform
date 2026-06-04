@@ -1,6 +1,6 @@
-@"
 .env
 __pycache__/
 *.pyc
 *.png
-"@ | Out-File -FilePath .gitignore -Encoding utf8
+venv/
+config/
