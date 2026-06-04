@@ -157,6 +157,8 @@ python scripts/10_kafka_producer.py
 
 ## 📊 Analytics Dashboard
 
+![Master Dashboard](reports/00_master_dashboard.png)
+
 The platform generates 10 analytical charts + a master dashboard:
 
 | Chart | Insight |
