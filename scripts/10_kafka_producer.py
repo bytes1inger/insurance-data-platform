@@ -7,6 +7,7 @@ and streams them to the 'insurance-events' topic.
 import json
 import time
 import random
+import uuid
 from datetime import datetime
 from kafka import KafkaProducer
 from faker import Faker
@@ -36,7 +37,7 @@ producer = KafkaProducer(
 def generate_policy_event():
     return {
         "event_type": "new_policy",
-        "policy_id": random.randint(10000, 99999),
+        "policy_id": str(uuid.uuid4()),
         "customer_name": fake.name(),
         "policy_type": random.choice(POLICY_TYPES),
         "premium_amount": round(random.uniform(5000, 80000), 2),
@@ -48,8 +49,8 @@ def generate_policy_event():
 def generate_claim_event():
     return {
         "event_type": "new_claim",
-        "claim_id": random.randint(10000, 99999),
-        "policy_id": random.randint(1, 2000),
+        "claim_id": str(uuid.uuid4()),
+        "policy_id": str(uuid.uuid4()),
         "claim_amount": round(random.uniform(10000, 500000), 2),
         "status": random.choice(CLAIM_STATUSES),
         "incident_date": fake.date_between(start_date="-6m", end_date="today").isoformat(),
@@ -59,8 +60,8 @@ def generate_claim_event():
 def generate_payment_event():
     return {
         "event_type": "new_payment",
-        "payment_id": random.randint(10000, 99999),
-        "policy_id": random.randint(1, 2000),
+        "payment_id": str(uuid.uuid4()),
+        "policy_id": str(uuid.uuid4()),
         "amount_paid": round(random.uniform(1000, 50000), 2),
         "payment_method": random.choice(PAYMENT_METHODS),
         "payment_date": datetime.utcnow().date().isoformat(),
