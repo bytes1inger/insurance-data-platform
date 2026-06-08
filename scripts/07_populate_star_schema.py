@@ -62,8 +62,8 @@ df_date = pd.DataFrame(dates)
 try:
     existing = pd.read_sql("SELECT date_key FROM dim_date", engine)
     df_date  = df_date[~df_date["date_key"].isin(existing["date_key"])]
-except:
-    pass
+except Exception as e:
+    print(f"⚠️  Could not read existing dim_date records: {e}")
 
 if len(df_date) > 0:
     df_date.to_sql("dim_date", engine, if_exists="append", index=False, chunksize=100, method=None)
@@ -119,8 +119,8 @@ dim_customer = customers[[
 try:
     existing = pd.read_sql("SELECT customer_id FROM dim_customer", engine)
     dim_customer = dim_customer[~dim_customer["customer_id"].astype(str).isin(existing["customer_id"].astype(str))]
-except:
-    pass
+except Exception as e:
+    print(f"⚠️  Could not read existing dim_customer records: {e}")
 
 if len(dim_customer) > 0:
     dim_customer.to_sql("dim_customer", engine, if_exists="append", index=False, chunksize=100, method=None)
@@ -141,8 +141,8 @@ try:
         print("ℹ️  dim_agent already populated")
         agents_df = pd.read_sql("SELECT agent_id FROM dim_agent", engine)
     else:
-        raise Exception("empty")
-except:
+        raise RuntimeError("dim_agent table is empty — seeding now")
+except Exception as e:
     channels = ["Direct", "Broker", "Online", "Bancassurance"]
     regions  = ["Nairobi Metro", "Central", "Coast", "Rift Valley", "Nyanza"]
 
@@ -211,8 +211,8 @@ df_sales = pd.DataFrame(fact_sales_rows)
 try:
     existing = pd.read_sql("SELECT sale_id FROM fact_sales", engine)
     df_sales = df_sales[~df_sales["sale_id"].isin(existing["sale_id"])]
-except:
-    pass
+except Exception as e:
+    print(f"⚠️  Could not read existing fact_sales records: {e}")
 
 if len(df_sales) > 0:
     df_sales.to_sql("fact_sales", engine, if_exists="append", index=False, chunksize=100, method=None)
@@ -277,14 +277,41 @@ df_claims = pd.DataFrame(claims)
 try:
     existing = pd.read_sql("SELECT claim_id FROM fact_claims", engine)
     df_claims = df_claims[~df_claims["claim_id"].isin(existing["claim_id"])]
-except:
-    pass
+except Exception as e:
+    print(f"⚠️  Could not read existing fact_claims records: {e}")
 
 if len(df_claims) > 0:
     df_claims.to_sql("fact_claims", engine, if_exists="append", index=False, chunksize=100, method=None)
     print(f"✅ fact_claims loaded: {len(df_claims)} rows")
 else:
     print("ℹ️  fact_claims already populated")
+
+
+# ============================================================
+# VIEW: summary_stats
+# Used by 11_analytics.py — SELECT * FROM summary_stats
+# ============================================================
+print("\n📐 Creating summary_stats view...")
+
+with engine.connect() as conn:
+    conn.execute(text("""
+        CREATE OR REPLACE VIEW summary_stats AS
+        SELECT 'Total Customers'       AS metric, COUNT(*)::text AS value FROM customers
+        UNION ALL
+        SELECT 'Total Policies',        COUNT(*)::text            FROM policies
+        UNION ALL
+        SELECT 'Total Claims',          COUNT(*)::text            FROM claims
+        UNION ALL
+        SELECT 'Gross Premium (KES)',   ROUND(SUM(premium_amount), 2)::text
+            FROM fact_sales
+        UNION ALL
+        SELECT 'Total Collected (KES)', ROUND(SUM(payment_amount), 2)::text
+            FROM fact_payments
+            WHERE payment_status = 'Completed'
+    """))
+    conn.commit()
+
+print("✅ summary_stats view created")
 
 
 # ============================================================
