@@ -1,5 +1,5 @@
 """
-Phase 8 — Kafka Producer
+Phase 8 - Kafka Producer
 Simulates real-time insurance events (new policies, claims, payments)
 and streams them to the 'insurance-events' topic.
 """
@@ -14,7 +14,7 @@ from faker import Faker
 
 fake = Faker()
 
-# ── Config ──────────────────────────────────────────────────────────────────
+# -- Config ------------------------------------------------------------------
 TOPIC = "insurance-events"
 BROKER = "localhost:9092"
 DELAY_SECONDS = 1  # 1 event per second
@@ -27,7 +27,7 @@ COUNTIES = ["Nairobi", "Mombasa", "Kisumu", "Nakuru", "Eldoret",
 
 EVENT_TYPES = ["new_policy", "new_claim", "new_payment"]
 
-# ── Producer ─────────────────────────────────────────────────────────────────
+# -- Producer ----------------------------------------------------------------
 producer = KafkaProducer(
     bootstrap_servers=BROKER,
     value_serializer=lambda v: json.dumps(v).encode("utf-8"),
@@ -74,9 +74,9 @@ GENERATORS = {
     "new_payment": generate_payment_event,
 }
 
-# ── Stream ───────────────────────────────────────────────────────────────────
+# -- Stream ------------------------------------------------------------------
 print("=" * 55)
-print("🚀 INSURANCE KAFKA PRODUCER STARTED")
+print("INSURANCE KAFKA PRODUCER STARTED")
 print(f"   Topic  : {TOPIC}")
 print(f"   Broker : {BROKER}")
 print(f"   Rate   : 1 event / {DELAY_SECONDS}s")
@@ -91,14 +91,13 @@ try:
         producer.send(TOPIC, key=event_type, value=event)
         count += 1
 
-        icon = {"new_policy": "📋", "new_claim": "🚨", "new_payment": "💳"}[event_type]
-        print(f"[{count:04d}] {icon}  {event_type:<14} | "
+        print(f"[{count:04d}] {event_type:<14} | "
               f"{event.get('county', event.get('status', event.get('payment_method', '')))} | "
               f"KES {event.get('premium_amount', event.get('claim_amount', event.get('amount_paid', 0))):,.2f}")
 
         time.sleep(DELAY_SECONDS)
 
 except KeyboardInterrupt:
-    print(f"\n✅ Producer stopped. Total events sent: {count}")
+    print(f"\nProducer stopped. Total events sent: {count}")
     producer.flush()
     producer.close()

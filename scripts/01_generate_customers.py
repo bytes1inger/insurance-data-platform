@@ -10,7 +10,7 @@ from config.db import engine
 
 fake = Faker()
 
-print("🚀 Generating customers...")
+print("Generating customers...")
 
 data = []
 
@@ -27,17 +27,17 @@ for _ in range(2000):
 
 df = pd.DataFrame(data)
 
-print("📊 DataFrame shape:", df.shape)
+print("DataFrame shape:", df.shape)
 
-print("🚀 Checking existing customers...")
+print("Checking existing customers...")
 
 existing_ids = pd.read_sql("SELECT customer_id FROM customers", engine)
 
 df = df[~df["customer_id"].isin(existing_ids["customer_id"])]
 
-print(f"📉 New records after dedup: {len(df)}")
+print(f"New records after dedup: {len(df)}")
 
-print("🚀 Loading into Postgres...")
+print("Loading into Postgres...")
 
 df.to_sql(
     "customers",
@@ -48,4 +48,4 @@ df.to_sql(
     method="multi"
 )
 
-print("✅ Customers loaded successfully")
+print("Customers loaded successfully")

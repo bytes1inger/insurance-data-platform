@@ -8,14 +8,14 @@ from datetime import datetime, timedelta
 import uuid
 from config.db import engine
 
-print("🚀 Connected to database")
+print("Connected to database")
 
 customers = pd.read_sql("SELECT customer_id FROM customers", engine)
 
 if customers.empty:
-    raise Exception("❌ No customers found. Load customers first.")
+    raise Exception("No customers found. Run 01_generate_customers.py first.")
 
-print(f"📊 Found {len(customers)} customers")
+print(f"Found {len(customers)} customers")
 
 policy_types = ["Life", "Health", "Auto", "Education"]
 
@@ -41,7 +41,7 @@ policies = [
 
 df = pd.DataFrame(policies)
 
-print(f"📊 Policies to insert: {len(df)}")
+print(f"Policies to insert: {len(df)}")
 
 df.to_sql(
     "policies",
@@ -52,4 +52,4 @@ df.to_sql(
     method="multi"
 )
 
-print("✅ Policies inserted successfully")
+print("Policies inserted successfully")
