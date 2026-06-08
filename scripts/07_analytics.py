@@ -91,7 +91,7 @@ monthly_premium = pd.read_sql("""
     SELECT
         d.year, d.month, d.month_name,
         ROUND(SUM(fs.premium_amount), 2)   AS premium,
-        ROUND(SUM(fs.commission_amount),2) AS commission,
+        ROUND(SUM(fs.commission_rate * fs.premium_amount),2) AS commission,
         COUNT(fs.sale_id)                  AS policies
     FROM fact_sales fs
     JOIN dim_date d ON fs.date_key = d.date_key
@@ -154,7 +154,7 @@ agent_perf = pd.read_sql("""
         da.channel,
         COUNT(fs.sale_id)                   AS policies,
         ROUND(SUM(fs.premium_amount), 2)    AS total_premium,
-        ROUND(SUM(fs.commission_amount), 2) AS commission
+        ROUND(SUM(fs.commission_rate * fs.premium_amount), 2) AS commission
     FROM fact_sales fs
     JOIN dim_agent da ON fs.agent_id::text = da.agent_id::text
     GROUP BY da.agent_id, da.agent_name, da.channel
